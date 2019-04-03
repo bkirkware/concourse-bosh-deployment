@@ -14,14 +14,6 @@ releases:
   version: ((postgres_version))
   sha1: ((postgres_sha1))
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=((postgres_version))
-- name: credhub
-  version: ((credhub_version))
-  sha1: ((credhub_sha1))
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=((credhub_version))
-- name: uaa
-  version: ((uaa_version))
-  sha1: ((uaa_sha1))
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=((uaa_version))
 
 instance_groups:
 - name: web
@@ -51,6 +43,18 @@ instance_groups:
         host_key: ((tsa_host_key))
         authorized_keys: |
           ((worker_key.public_key))
+
+      credhub:
+        client_id: director_to_credhub #default client name; do not change
+        client_secret: ((director_to_credhub_client_secret)) #(bosh int ./creds.yml --path /uaa_clients_director_to_credhub)
+        path_prefix: /concourse
+        tls:
+          insecure_skip_verify: false
+          # certificate derived from creds.yml file from BOSH Director deployment.
+          # use commandd for certificate: bosh int ./creds.yml --path /credhub_ca/ca
+          ca_cert: ((director_to_credhub_ca_cert))
+
+        url: https://bosh.control.kirklab.io:8844
 
 - name: db
   instances: 1
